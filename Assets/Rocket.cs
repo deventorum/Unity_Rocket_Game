@@ -74,8 +74,12 @@ public class Rocket : MonoBehaviour {
             case "Fuel":
                 print("Fuel");
                 break;
+            case "Finish":
+                print("Congratulations!!!");
+                break;
             default:
                 print("Dead");
+                // kill player
                 break;
         }
     }
