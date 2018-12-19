@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(AudioSource))]
 public class Rocket : MonoBehaviour {
@@ -9,21 +10,28 @@ public class Rocket : MonoBehaviour {
     Rigidbody rigidBody;
     AudioSource audioData;
     AudioSource collisionAudio;
+
     [SerializeField] float MainThrust = 100f; 
-
     [SerializeField] float RcsThrust = 100f;
+    private int currentScene;
 
+    enum State { Alive, Dying, Transcending };
+    State state = State.Alive; 
 
     // Use this for initialization
     void Start () {
         rigidBody = GetComponent<Rigidbody>();
         audioData = GetComponent<AudioSource>();
         collisionAudio = GetComponent<AudioSource>();
+        currentScene = SceneManager.GetActiveScene().buildIndex;
     }
 	
 	// Update is called once per frame
-	void Update () {
-        ProcessInput();
+	void FixedUpdate () {
+        if (state == State.Alive)
+        {
+            ProcessInput();
+        }
     }
 
     private void ProcessInput()
@@ -69,19 +77,35 @@ public class Rocket : MonoBehaviour {
         switch (collision.gameObject.tag)
         {
             case "Friendly":
-                print("OK"); //todo remove this line
                 break;
             case "Fuel":
                 print("Fuel");
                 break;
             case "Finish":
-                print("Congratulations!!!");
+                state = State.Transcending;
+                Invoke("LoadNextScene", 2f);
                 break;
             default:
-                print("Dead");
-                // kill player
+                state = State.Dying;
+                Invoke("LoadSameScene", 2f);
                 break;
         }
+    }
+
+    private void LoadNextScene()
+    {
+        if (currentScene + 1 == SceneManager.sceneCountInBuildSettings)
+        {
+            print("You have finished the game!");
+        }
+        else
+        {
+            SceneManager.LoadScene(currentScene + 1);
+        }
+    }
+    private void LoadSameScene()
+    {
+        SceneManager.LoadScene(currentScene);
     }
 
 }
